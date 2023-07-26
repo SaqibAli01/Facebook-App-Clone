@@ -12,7 +12,7 @@ import React, { useEffect, useState } from "react";
 import Loading from "../Loader/Loading";
 import { useDispatch, useSelector } from "react-redux";
 import avatarBg from "../../images/bgAvatar.png";
-import { createPost } from "../../ReduxToolKit/postSlice";
+import { createPost, getAllPosts } from "../../ReduxToolKit/postSlice";
 import { toast } from "react-toastify";
 import PostList from "./PostList";
 // import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -42,15 +42,34 @@ const Home = () => {
   const [file, setFile] = useState(null);
   const [text, setTextValue] = useState("");
 
+  // const handleFileChange = (event) => {
+  //   const myFile = event.target.files[0];
+  //   setFile(myFile);
+  //   if (myFile) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(myFile);
+  //   }
+  // };
+
   const handleFileChange = (event) => {
-    const myFile = event.target.files[0];
-    setFile(myFile);
-    if (myFile) {
+    const selectedFile = event.target.files[0];
+    setFile(selectedFile);
+
+    if (!selectedFile.type.includes("image")) {
+      toast.error("Please select a image");
+    }
+
+    if (selectedFile && selectedFile.type.includes("image")) {
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result);
       };
-      reader.readAsDataURL(myFile);
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setImage(null);
     }
   };
 
@@ -67,7 +86,13 @@ const Home = () => {
     }
 
     dispatch(createPost({ text, file }));
-    setLoading(false);
+
+    setTimeout(() => {
+      setTextValue("");
+      setImage(null);
+      setLoading(false);
+      dispatch(getAllPosts());
+    }, 3000);
   };
 
   return (
@@ -133,6 +158,7 @@ const Home = () => {
                   onChange={(e) => setTextValue(e.target.value)}
                   sx={{
                     background: theme.palette.background.grayBg,
+                    border: `1px solid ${theme.palette.background.borderLight}`,
                     px: 5,
                     borderRadius: "20px",
                     width: "100%",
@@ -165,7 +191,7 @@ const Home = () => {
                 )} */}
 
                 {image ? (
-                  <div>
+                  <Box>
                     <img
                       src={image}
                       alt="Selected"
@@ -173,10 +199,9 @@ const Home = () => {
                     />
                     <br />
                     <Button onClick={handleClearImage}>Clear Image</Button>
-                  </div>
+                  </Box>
                 ) : (
                   <FormControl>
-                    {/* <InputLabel htmlFor="image-input">Select Image</InputLabel> */}
                     <Input
                       id="image-input"
                       type="file"

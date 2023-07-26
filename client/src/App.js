@@ -22,7 +22,10 @@ import Logout from "./components/user/Logout";
 import Home from "./components/Home/Home";
 import PostList from "./components/Home/PostList";
 import VerificationCode from "./components/user/VerificationCode";
-import ReSendVerifyCode from "./components/user/ReSendVerifyCode";
+import About from "./components/About/About";
+import Contact from "./components/Contact/Contact";
+// import ReSendVerifyCode from "./components/user/ReSendVerifyCode";
+// import Footer from "./components/Footer/Footer";
 
 
 
@@ -99,11 +102,12 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/postList" element={<PostList />} />
           <Route path="/verificationCode" element={<VerificationCode />} />
-          <Route path="/reSendVerifyCode" element={<ReSendVerifyCode />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
 
         </Routes>
 
-
+        {/* <Footer /> */}
 
       </ThemeProvider>
     </>

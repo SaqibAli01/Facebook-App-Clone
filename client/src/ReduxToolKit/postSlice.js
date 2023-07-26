@@ -48,6 +48,30 @@ export const getAllPosts = createAsyncThunk(
     }
 );
 
+//_____________________________ Get Single Post ___________________________________
+
+
+
+
+
+export const getUserPosts = createAsyncThunk(
+    'post/getUserPosts',
+    async (userId) => {
+        console.log("userId", userId)
+        const token = localStorage.getItem("token");
+        try {
+            const headers = {
+                token: token,
+            };
+            const response = await axios.get(`http://localhost:8000/api/v1/user-posts/${userId}`, { headers });
+            console.log('response.data single user', response.data)
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response.data.error);
+        }
+    }
+);
+
 //_____________________________ Delete Post___________________________________
 
 
@@ -90,14 +114,13 @@ const postSlice = createSlice({
             })
             .addCase(createPost.fulfilled, (state, action) => {
                 state.loading = false;
-                state.successMessage = action.payload.message;
-                console.log('action.payload.message', action.payload.message)
-                toast.success(action.payload.message);
+                state.successMessage = action?.payload?.message;
+                toast.success(action?.payload?.message);
             })
             .addCase(createPost.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload.message;
-                toast.error(action.error.message);
+                state.error = action?.payload?.message;
+                toast.error(action?.error?.message);
             })
 
             //______________________________Get All Post__________________________________
@@ -107,13 +130,29 @@ const postSlice = createSlice({
             })
             .addCase(getAllPosts.fulfilled, (state, action) => {
                 state.loading = false;
-                state.posts = action.payload;
+                state.posts = action?.payload;
                 // toast.success(action.payload.message);
             })
             .addCase(getAllPosts.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload.message;
-                // toast.error(action.error.message);
+                state.error = action?.payload?.message;
+                // toast.error(action?.error?.message);
+            })
+
+            //______________________________Get Single Post______________________________
+            .addCase(getUserPosts.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getUserPosts.fulfilled, (state, action) => {
+                state.loading = false;
+                state.posts = action?.payload;
+                toast.success(action?.payload?.message);
+            })
+            .addCase(getUserPosts.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action?.payload?.message;
+                // toast.error(action?.error?.message);
             })
 
             //________________________Delete Post________________________________________
@@ -124,17 +163,13 @@ const postSlice = createSlice({
             .addCase(deletePost.fulfilled, (state, action) => {
                 state.loading = false;
                 state.posts = state.posts.filter((post) => post._id !== action.payload._id);
-                console.log("state.posts", state?.posts)
                 toast.success(action?.payload?.message)
                 // toast.success(action?.payload?.message || 'Post deleted successfully.');
             })
             .addCase(deletePost.rejected, (state, action) => {
                 state.loading = false;
-                // state.error = action.error.message;
+                state.error = action?.error?.message;
                 state.error = action?.payload?.message;
-                console.log('action.error.message', action?.error?.message)
-                console.log('action.payload.message', action)
-                // toast.error(action.error.message || 'Failed to delete post.');
                 toast.error(action?.error?.message)
             });
     },

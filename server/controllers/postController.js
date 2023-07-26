@@ -90,6 +90,43 @@ export const getAllPosts = async (req, res) => {
 };
 
 
+//----------------------------- Get Single Data-----------------------------------
+export const getUserPosts = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+
+        const posts = await Post.find({ author: userId })
+            .populate({
+                path: "author",
+                select: ["firstName", "lastName", "avatar"],
+            })
+            .populate({
+                path: "comments",
+                populate: [
+                    {
+                        path: "author",
+                        select: ["firstName", "lastName", "text", "avatar"],
+                    },
+                    {
+                        path: "replyComments",
+                        populate: {
+                            path: "author",
+                            select: ["firstName", "lastName", "text", "avatar"],
+                        },
+                    },
+                ],
+            });
+
+
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "An error occurred while retrieving posts." });
+    }
+};
+
+
 //------------------------------ Delete Post ----------------------------------
 
 export const deletePost = async (req, res) => {

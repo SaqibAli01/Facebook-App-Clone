@@ -35,7 +35,10 @@ const signUp = async (req, res) => {
 
         // Generate a verification code
         const verificationCode = generateVerificationCode();
-        console.log('verificationCode', verificationCode);
+        const verificationCodeExpiresAt = new Date(Date.now() + 60000); // 60,000 milliseconds = 1 minute (adjust as needed)
+
+
+        // console.log('verificationCode', verificationCode);
 
         const newUser = new User({
             firstName,
@@ -45,14 +48,15 @@ const signUp = async (req, res) => {
             dob,
             gender,
             avatar: avatarPath,
-            verificationCode, // Add the verification code to the user record
+            verificationCode,
+            verificationCodeExpiresAt, // Add the verification code to the user record
             verified: false, // Set the verified field to false initially
         });
         // console.log('newUser', newUser);
         await newUser.save();
 
         // Send the verification code to the user's email
-        console.log('email, verificationCode', email, verificationCode);
+        // console.log('email, verificationCode', email, verificationCode);
         await sendVerificationCode(email, verificationCode);
 
 
@@ -78,17 +82,23 @@ export const verifyCode = async (req, res) => {
 
         // const user = await User.findOne({ email });
         const user = await User.findOne({ verificationCode });
-        // console.log('verificationCode', verificationCode);
-        // console.log('user.verificationCode', user?.verificationCode);
+        console.log('verificationCode', verificationCode);
+        console.log('user.verificationCode', user?.verificationCode);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the verification code has expired
+        if (user.verificationCodeExpiresAt < new Date()) {
+            return res.status(400).json({ message: 'Verification code has expired' });
         }
 
         if (user.verificationCode === verificationCode) {
             // Update the user's record to mark it as verified
             await User.findByIdAndUpdate(user._id, { verified: true });
             user.verificationCode = undefined;
+            user.verificationCodeExpiresAt = undefined;
             await user.save();
             return res.status(200).json({ message: 'Verification successful' });
         } else {
@@ -102,6 +112,7 @@ export const verifyCode = async (req, res) => {
 
 export const resendVerificationCode = async (req, res) => {
     try {
+
         const { email } = req.body;
 
         const user = await User.findOne({ email });
@@ -115,18 +126,27 @@ export const resendVerificationCode = async (req, res) => {
             return res.status(400).json({ message: 'User is already verified' });
         }
 
-        // Generate a new verification code
-        const verificationCode = generateVerificationCode();
-        console.log('New verificationCode', verificationCode);
+        // Check if the verification code has expired
+        if (user.verificationCodeExpiresAt && user.verificationCodeExpiresAt < new Date()) {
+            // Generate a new verification code
+            const verificationCode = generateVerificationCode();
+            console.log('New verificationCode', verificationCode);
 
-        // Update the user's verification code in the database
-        user.verificationCode = verificationCode;
-        await user.save();
+            // Update the user's verification code and expiration time in the database
+            user.verificationCode = verificationCode;
+            user.verificationCodeExpiresAt = new Date(Date.now() + 60000); // 60,000 milliseconds = 1 minute (adjust as needed)
+            await user.save();
 
-        // Send the new verification code to the user's email
-        await sendVerificationCode(email, verificationCode);
+            // Send the new verification code to the user's email
+            await sendVerificationCode(email, verificationCode);
 
-        return res.status(200).json({ message: 'Verification code resent successfully' });
+            return res.status(200).json({ message: 'Verification code resent successfully' });
+        }
+        else {
+            return res.status(400).json({ message: 'Verification code is still valid' });
+        }
+
+
     } catch (error) {
         console.error('Error in resendVerificationCode:', error);
         return res.status(500).json({ message: 'Internal server error' });

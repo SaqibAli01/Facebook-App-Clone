@@ -1,13 +1,24 @@
-import React, { useState, useRef } from "react";
-import { TextField, Button, Typography, Box, Container } from "@mui/material";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import Loading from "../Loader/Loading";
 import { useTheme } from "@emotion/react";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { verification } from "../../ReduxToolKit/userSlice";
-
+import Timer from "./Timer";
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";
+import ReSendVerifyCode from "./ReSendVerifyCode";
 
 const VerificationCodeInput = styled(TextField)(({ theme }) => ({
   "& input": {
@@ -34,6 +45,19 @@ const VerificationCode = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // const data = useSelector((state) => state); // Check the slice name 'user'
+  // console.log("data email", data?.email);
+  const [reSendEmail, setRdSendEmail] = useState();
+  const location = useLocation();
+
+  const setSendEmail = location?.state?.reSendEmail;
+  console.log("🚀 ~ file reSendEmail:", reSendEmail);
+
+  useEffect(() => {
+    setRdSendEmail(setSendEmail);
+  }, [setSendEmail]);
+
   // _______________Loading State________________
   const [loading, setLoading] = useState(false);
 
@@ -96,6 +120,16 @@ const VerificationCode = () => {
     setLoading(false);
 
     // console.log("verificationCode", verificationCode.join(""));
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
   };
 
   return (
@@ -165,9 +199,9 @@ const VerificationCode = () => {
                   justifyContent: "center",
                   alignItems: "center",
                   flexDirection: "column",
-                  mt: 5,
                 }}
               >
+                <Timer />
                 <Box>
                   <Button
                     type="submit"
@@ -187,13 +221,48 @@ const VerificationCode = () => {
                     py: 2,
                   }}
                 >
-                  <Link to="/reSendVerifyCode">
+                  <Button onClick={handleOpen}>Resend Code</Button>
+
+                  {/* <Link
+                    // to="/reSendVerifyCode"
+                    to={{
+                      pathname: "/reSendVerifyCode",
+                      state: { reSendEmail: reSendEmail },
+                    }}
+                  >
                     <span style={{ textDecoration: "none" }}>Resend Code</span>
-                  </Link>
+                  </Link> */}
                 </Box>
               </Box>
             </form>
           </Box>
+
+          <div>
+            {/* <Button onClick={handleOpen}>Resend Code</Button> */}
+
+            <Dialog open={isOpen} onClose={handleClose}>
+              <DialogTitle>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Resend Verify Code
+                </Typography>
+              </DialogTitle>
+              <DialogContent>
+                <ReSendVerifyCode
+                  reSendEmail={reSendEmail}
+                  handleClose={handleClose}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose}>Close</Button>
+              </DialogActions>
+            </Dialog>
+          </div>
         </Box>
       </Container>
     </>

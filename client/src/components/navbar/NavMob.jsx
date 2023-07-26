@@ -81,7 +81,7 @@ const NavMob = ({ children }) => {
   const classes = useStyles();
   const [state, setState] = React.useState({ left: false });
 
-  const styledactivelink = ({ isActive }) => {
+  const styledActiveLink = ({ isActive }) => {
     return {
       FontFamily: "Poppins",
       textDecoration: "none",
@@ -117,6 +117,7 @@ const NavMob = ({ children }) => {
   };
   const list = (anchor) => (
     <div
+      key={anchor}
       className={clsx(classes.list, {
         [classes.fullList]: anchor === "top" || anchor === "bottom",
       })}
@@ -156,16 +157,16 @@ const NavMob = ({ children }) => {
       </Box>
 
       <List sx={{ mt: 5 }}>
-        {array.map(({ icon, link1, name }, index) => {
+        {array.map(({ link1, name }, index) => {
           return (
             <>
-              <NavLink to={link1} key={index} style={styledactivelink}>
-                {icon}
-
-                <Typography sx={{ fontFamily: "Poppins", color: "red" }}>
-                  {name}
-                </Typography>
-              </NavLink>
+              <React.Fragment key={index}>
+                <NavLink to={link1} key={index} style={styledActiveLink}>
+                  <Typography sx={{ fontFamily: "Poppins", color: "red" }}>
+                    {name}
+                  </Typography>
+                </NavLink>
+              </React.Fragment>
             </>
           );
         })}

@@ -167,7 +167,6 @@ const Profile = () => {
               }}
             >
               {data ? `User Name: ${F_Name} ${L_Name} ` : "User Name"}
-              {/* Saqib Ali */}
             </Typography>
 
             <Typography
@@ -177,10 +176,9 @@ const Profile = () => {
               }}
             >
               {data ? `Email: ${email}` : "User Email"}
-
-              {/* saqibali046@gmail.com */}
             </Typography>
           </Box>
+
           {/* //Dialog  1*/}
           <Box>
             <Dialog open={isOpen} onClose={handleClose}>
@@ -212,6 +210,25 @@ const Profile = () => {
                       sx={{ width: 100, height: 100, my: 2, m: "auto" }}
                       onClick={handleOpen}
                     />
+                    <Box sx={{ py: 3 }}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          textAlign: "center",
+                        }}
+                      >
+                        {data ? ` ${F_Name} ${L_Name} ` : "User Name"}
+                      </Typography>
+
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          textAlign: "center",
+                        }}
+                      >
+                        {data ? ` ${email}` : "User Email"}
+                      </Typography>
+                    </Box>
                     <input
                       type="file"
                       accept="image/*"
@@ -241,9 +258,21 @@ const Profile = () => {
                         style={{ display: "none" }}
                       />
                     </Button>
-                    <Button onClick={handleProfileUpdate} variant="gradient">
-                      Update Profile
-                    </Button>
+                    {selectedFile ? (
+                      <Button onClick={handleProfileUpdate} variant="gradient">
+                        Update Profile
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={handleProfileUpdate}
+                          variant="gradient"
+                          disabled
+                        >
+                          Update Profile
+                        </Button>
+                      </>
+                    )}
                   </Box>
                 </DialogActions>
               </Box>
@@ -296,6 +325,7 @@ const Profile = () => {
                     Update Details
                   </Typography>
                 </DialogTitle>
+
                 <DialogContent>
                   <UserUpdatesInfo handleClose3={handleClose3} />
                 </DialogContent>
@@ -310,7 +340,7 @@ const Profile = () => {
             }}
           >
             <Button type="submit" variant="gradient" onClick={handleOpen}>
-              Update Profile
+              Change Profile
             </Button>
 
             <Button type="submit" variant="gradient" onClick={handleOpen2}>

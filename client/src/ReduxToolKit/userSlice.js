@@ -201,15 +201,31 @@ export const logout = createAsyncThunk('user/logout', async () => {
     }
 });
 
+//____________________________ Resend Verification Code ________________________
+export const resendVerificationCode = createAsyncThunk(
+    'verification/resendVerificationCode',
+    async (email) => {
+        console.log('email', email)
+        try {
+
+            const response = await axios.post('http://localhost:8000/api/v1/resend-verification', { email });
+            console.log('response', response)
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+);
+
 //___________________________  user slice _______________________________
 
 const userSlice = createSlice({
     name: 'user',
     initialState: {
         loading: false,
+        user: null,
         error: null,
         successMessage: '',
-        user: null,
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -224,13 +240,14 @@ const userSlice = createSlice({
             .addCase(signup.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload;
-                state.successMessage = action.payload.message;
+                state.successMessage = action?.payload?.message;
                 toast.success(action?.payload?.message);
+
             })
             .addCase(signup.rejected, (state, action) => {
                 state.loading = false;
                 state.user = null;
-                state.error = action.error.message;
+                state.error = action?.error?.message;
                 toast.error(action?.error?.message);
             })
 
@@ -400,8 +417,25 @@ const userSlice = createSlice({
                 // state.loading = false;
                 // state.error = action.error.message;
                 // toast.error(action?.error?.message);
-            });
+            })
 
+            //___________________ Re Send VerificationCode _______________________
+
+            .addCase(resendVerificationCode.pending, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(resendVerificationCode.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                toast.success(action?.payload?.message);
+            })
+            .addCase(resendVerificationCode.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action?.error?.message;
+                toast.error(action?.error?.message);
+
+            });
 
 
 

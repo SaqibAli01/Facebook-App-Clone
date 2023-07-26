@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   InputBase,
+  Stack,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -36,24 +37,21 @@ const PostList = () => {
   // _______________Loading State________________
   const [loadings, setLoading] = useState(false);
 
-  // const [isBoxVisible, setIsBoxVisible] = useState(false); // comment box hide or show
   const [text, setTextValue] = useState(""); // comment text
-  // const [commentPostId, setCommentPostID] = useState(); // comment text
 
-  // const [parentComment, setparentComment] = useState(""); // comment text
   const [activePost, setActivePost] = useState(null);
   const [showCommentField, setShowCommentField] = useState(false);
-  // const [name, setName] = useState();
 
-  // const [imgAvatar, setImgAvatar] = useState();
+  const [loggedInUserId, setLoggedInUserId] = useState();
+  const data = useSelector((state) => state?.user?.user?.user);
 
-  // const { posts, loading, error } = useSelector((state) => state?.post);
   const { posts, error } = useSelector((state) => state?.post);
-  console.log("posts~~~~~~~~", posts);
+  console.log("posts", posts);
 
   useEffect(() => {
     dispatch(getAllPosts());
-  }, [dispatch]);
+    setLoggedInUserId(data?._id);
+  }, [dispatch, data]);
 
   // if (loading) {
   //   return <div>Loading...</div>;
@@ -63,7 +61,7 @@ const PostList = () => {
     return <div>Error: {error}</div>;
   }
 
-  const getAllp = () => {
+  const getAllPost = () => {
     dispatch(getAllPosts());
   };
 
@@ -164,16 +162,15 @@ const PostList = () => {
       <Loading isLoading={loadings} />
 
       <Box>
-        <Button onClick={getAllp}>All Post</Button>
+        <Button onClick={getAllPost}>All Post</Button>
 
-        {posts.map((post) => (
+        {[...posts].reverse().map((post) => (
           <Box key={post?._id}>
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-
                 gap: 4,
                 // border: "1px solid",
               }}
@@ -197,7 +194,9 @@ const PostList = () => {
                     sx={{ width: 50, height: 50, my: 0.5 }}
                   />
                 )}
-                <Typography variant="h5">{post?.author?.firstName}</Typography>
+                <Typography variant="h5">
+                  {post?.author?.firstName} {post?.author?.lastName}
+                </Typography>
               </Box>
               <Box>
                 <MoreVertIcon
@@ -294,61 +293,71 @@ const PostList = () => {
               )}
               {post.comments.map((comment) => {
                 return (
-                  <Box
-                    key={comment?._id}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 3,
-                      px: 1,
-                      // border: "2px solid red",
-                      my: 1,
-                      background: theme.palette.background.light,
-                    }}
-                  >
-                    <Avatar
-                      src={`${imageUrl}${comment?.author?.avatar}`}
-                      sx={{ width: 50, height: 50, my: 0.5 }}
-                    />
-
-                    <Typography variant="h5">
-                      {comment?.author?.firstName}
-                    </Typography>
-                    <Box
+                  <>
+                    <Stack
+                      direction="row"
+                      spacing={2}
+                      justifyContent={"space-between"}
+                      alignItems={"center"}
                       sx={{
                         background: theme.palette.background.light,
-                        width: "100%",
-                        py: 1.5,
-                        pl: 2,
+                        px: 1,
+                        my: 1,
                       }}
                     >
-                      <Typography>{comment?.text}</Typography>
-                      {/* <Typography>{comment?.author?._id}</Typography> */}
-                    </Box>
-
-                    <Button
-                      // variant="gradient"
-                      onClick={(e) => handleLikeComment(comment?._id)}
-                    >
-                      {likedComment && likedComment.includes(comment?._id) ? (
-                        <FavoriteIcon style={{ color: "red" }} />
-                      ) : (
-                        <FavoriteIcon style={{ color: "green" }} />
-                      )}
-                      Likes
-                      <Typography variant="p" sx={{ pl: 3 }}>
-                        {comment?.likes?.length}
-                      </Typography>
-                    </Button>
-
-                    <Button
-                      // variant="gradient"
-                      // onClick={(e) => handleDeleteComment(comment?.author?._id)}
-                      onClick={(e) => handleDeleteComment(comment?._id)}
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 2,
+                        }}
+                      >
+                        <Avatar
+                          src={`${imageUrl}${comment?.author?.avatar}`}
+                          sx={{ width: 50, height: 50, my: 0.5 }}
+                        />
+                        <Typography variant="h5">
+                          {comment?.author?.firstName}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography>{comment?.text}</Typography>
+                      </Box>
+                      <Box>
+                        {comment?.author?._id === loggedInUserId ||
+                        post?.author?._id === loggedInUserId ? (
+                          <Button
+                            onClick={() =>
+                              handleDeleteComment(
+                                comment._id,
+                                post?.author?._id
+                              )
+                            }
+                          >
+                            <DeleteIcon />
+                          </Button>
+                        ) : null}
+                      </Box>
+                      <Box>
+                        <Button
+                          // variant="gradient"
+                          onClick={(e) => handleLikeComment(comment?._id)}
+                        >
+                          {likedComment &&
+                          likedComment.includes(comment?._id) ? (
+                            <FavoriteIcon style={{ color: "green" }} />
+                          ) : (
+                            <FavoriteIcon style={{ color: "red" }} />
+                          )}
+                          Likes
+                          <Typography variant="p" sx={{ pl: 3 }}>
+                            {comment?.likes?.length}
+                          </Typography>
+                        </Button>
+                      </Box>
+                    </Stack>
+                  </>
                 );
               })}
             </Box>

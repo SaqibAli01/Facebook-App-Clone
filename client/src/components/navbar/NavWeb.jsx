@@ -46,45 +46,6 @@ const NavWeb = ({ themeToggler, mode }) => {
         { name: "Sign Up", link1: "/signup" },
       ];
 
-  // const array = [
-  //   {
-  //     name: "Home",
-  //     link1: "/",
-  //     icon: <HomeIcon />,
-  //   },
-  //   {
-  //     name: "About",
-  //     link1: "/about",
-  //     // icon: <LocationOnIcon />,
-  //   },
-  //   {
-  //     name: "Contact",
-  //     link1: "/contact",
-  //     // icon: <GavelIcon />,
-  //   },
-  //   {
-  //     name: "Login",
-  //     link1: "/login",
-  //     // icon: <GavelIcon />,
-  //   },
-  //   {
-  //     name: "SIGN UP",
-  //     link1: "/signup",
-  //     // icon: <GavelIcon />,
-  //   },
-  //   {
-  //     name: "Profile",
-  //     link1: "/profile ",
-  //     // icon: <GavelIcon />,
-  //   },
-
-  //   {
-  //     name: "Logout",
-  //     link1: "/logout ",
-  //     // icon: <GavelIcon />,
-  //   },
-  // ];
-
   // const MyThemeComponent = styled('div')(({ theme }) => ({
   //   color: theme.palette.primary.contrastText,
   //   backgroundColor: theme.palette.primary.main,

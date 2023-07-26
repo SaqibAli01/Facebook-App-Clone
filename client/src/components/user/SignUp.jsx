@@ -62,9 +62,13 @@ const SignUp = () => {
     // dispatch(signup(formData));
     const response = await dispatch(signup(formData));
     setLoading(false);
-    console.log("response.payload", response?.payload?.email);
+    const reSendEmail = response?.payload?.email;
+    console.log("response.payload", reSendEmail);
+
     if (response.payload) {
-      navigate("/verificationCode");
+      // navigate("/verificationCode");
+      navigate("/verificationCode", { state: { reSendEmail } });
+      // Pass reSendEmail as state to the next route
     }
   };
 

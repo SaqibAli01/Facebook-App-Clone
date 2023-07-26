@@ -35,6 +35,11 @@ const userSchema = new Schema({
     avatar: {
         type: String,
     },
+    roles: {
+        type: [String],
+        enum: ["user", "admin",],
+        default: ["user"],
+    },
 
     createdAt: {
         type: Date,
@@ -44,12 +49,23 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    // verificationCode: {
+    //     type: String,
+    //     default: null, // Initially set to null as no verification code is generated yet
+    // },
     verificationCode: {
         type: String,
-        default: null, // Initially set to null as no verification code is generated yet
+        default: null, // or omit the default value if you prefer
     },
+    verificationCodeExpiresAt: {
+        type: Date,
+        default: null, // or omit the default value if you prefer
+    },
+
+
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+
 });
 
 const User = mongoose.model('User', userSchema);

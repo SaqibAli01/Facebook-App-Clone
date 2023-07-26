@@ -123,8 +123,8 @@ const commentSlice = createSlice({
             })
             .addCase(deleteComment.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
-                toast.error(action?.error?.message);
+                state.error = action?.error?.message;
+                toast.error("You are not authorized to delete this comment");
             })
             //------------------------likes Comments Comment----------------------------------------
 
