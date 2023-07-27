@@ -194,30 +194,61 @@ export const deletePost = async (req, res) => {
 
 
 //--------------------------- Share Post ------------------------------
+// export const sharePost = async (req, res) => {
+//     try {
+//         const { postId } = req.params;
+//         const { text } = req.body;
+//         // console.log('text', text)
+//         // console.log('postId', postId)
+
+//         const originalPost = await Post.findById(postId);
+//         console.log("🚀  originalPost:", originalPost)
+//         if (!originalPost) {
+//             return res.status(404).json({ message: 'Post not found' });
+//         }
+
+//         const sharedPost = new Post({
+//             text,
+//             author: req.user._id,
+//             sharedPost: originalPost._id,
+//             // originalPost,
+//         });
+
+//         const savedSharedPost = await sharedPost.save();
+//         res.status(200).json({ message: 'Post shared successfully', sharedPost: savedSharedPost });
+//     } catch (error) {
+//         console.error('An error occurred while sharing the post.', error);
+//         res.status(500).json({ message: 'Failed to share the post' });
+//     }
+// };
+
+
 export const sharePost = async (req, res) => {
     try {
         const { postId } = req.params;
-        const { text } = req.body;
-        // console.log('text', text)
-        // console.log('postId', postId)
 
-        const originalPost = await Post.findById(postId);
-        console.log("🚀  originalPost:", originalPost)
-        if (!originalPost) {
-            return res.status(404).json({ message: 'Post not found' });
+        // Find the post by its ID
+        const post = await Post.findById(postId);
+        const link = postId
+        console.log("🚀 ~ file: postController.js:232 ~ sharePost ~ post:", post)
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
         }
 
+        // Update the "shared" field of the post to true
+        post.shared = true;
+        // await post.save();
         const sharedPost = new Post({
-            text,
+            text: `Share Post ${link}`,
             author: req.user._id,
-            sharedPost: originalPost._id,
-            // originalPost,
-        });
+            sharedPost: post._id,
 
-        const savedSharedPost = await sharedPost.save();
-        res.status(200).json({ message: 'Post shared successfully', sharedPost: savedSharedPost });
+        });
+        await sharedPost.save();
+
+        res.status(200).json({ message: "Post shared successfully", post });
     } catch (error) {
-        console.error('An error occurred while sharing the post.', error);
-        res.status(500).json({ message: 'Failed to share the post' });
+        console.error(error);
+        res.status(500).json({ error: "An error occurred while sharing the post." });
     }
 };

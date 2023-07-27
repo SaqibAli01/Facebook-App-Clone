@@ -68,26 +68,8 @@ export const getUserPosts = createAsyncThunk(
     }
 );
 
-//_____________________________ Get Single Post ___________________________________
 
-export const sharePosts = createAsyncThunk(
-    'post/sharePosts',
-    async (postId) => {
-        console.log("postId", postId)
-        const token = localStorage.getItem("token");
 
-        try {
-            const headers = {
-                token: token,
-            };
-            const response = await axios.post(`http://localhost:8000/api/v1/share/${postId}`, { headers });
-            console.log('share user', response.data)
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response.data.error);
-        }
-    }
-);
 
 
 //_____________________________ Delete Post___________________________________
@@ -204,22 +186,6 @@ const postSlice = createSlice({
                 // toast.error(action?.error?.message);
             })
 
-            //______________________________Share Post______________________________
-
-            .addCase(sharePosts.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(sharePosts.fulfilled, (state, action) => {
-                state.loading = false;
-                state.posts = action?.payload;
-                toast.success(action?.payload?.message);
-            })
-            .addCase(sharePosts.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action?.payload?.message;
-                toast.error(action?.error?.message);
-            })
 
             //________________________Delete Post________________________________________
             .addCase(deletePost.pending, (state) => {

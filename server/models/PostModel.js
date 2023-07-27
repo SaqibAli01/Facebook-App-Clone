@@ -11,6 +11,9 @@ const postSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    shared: { type: Boolean, default: false },
+    // New field for indicating if the post has been shared
+
 });
 
 export const Post = model("Post", postSchema);

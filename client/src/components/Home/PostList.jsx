@@ -43,11 +43,16 @@ const PostList = () => {
   // _______________Loading State________________
   const [loadings, setLoading] = useState(false);
   const [shareText, setShareText] = useState("");
+  const [shareLink, setShareLink] = useState("");
 
   const [text, setTextValue] = useState(""); // comment text
 
   const [activePost, setActivePost] = useState(null);
   const [showCommentField, setShowCommentField] = useState(false);
+
+  //share post
+  const [activePostShare, setActivePostShare] = useState(null);
+  const [showShareField, setShowShareField] = useState(false);
 
   const [loggedInUserId, setLoggedInUserId] = useState();
 
@@ -161,20 +166,29 @@ const PostList = () => {
     }, 3000);
   };
 
-  //-------------------------------Share Post -------------------------------
-  const sharePostHandler = (postId) => {
-    toast.success(postId);
-    // console.log("Share Post ", postId);
-    dispatch(sharePosts(postId));
-  };
-
   //----------------get Single Post ----------------
   const getSinglePostHandler = (postId) => {
     // navigate("/singlePost");
     navigate(`/singlePost/${postId}`);
-
-    // toast.success(postId);
   };
+  //-------------------------------Share Post -------------------------------
+  const getShareLink = (postId) => {
+    // Replace "your-domain" with the actual domain of your application
+    const baseUrl = "http://localhost:3000";
+    const shareUrl = `${baseUrl}/singlePost/${postId}`;
+    return shareUrl;
+  };
+  const sharePostHandler = (postId) => {
+    setActivePostShare(postId);
+    setShowShareField(true);
+    const shareUrl = getShareLink(postId);
+    setShareLink(shareUrl);
+  };
+
+  // const handleShare = () => {
+  //   const shareUrl = getShareLink(postId);
+  //   setShareLink(shareUrl);
+  // };
 
   return (
     <>
@@ -184,11 +198,7 @@ const PostList = () => {
         <Button onClick={getAllPost}>All Post</Button>
 
         {[...posts].reverse().map((post) => (
-          <Box
-            key={post?._id}
-            onClick={(e) => getSinglePostHandler(post._id)}
-            sx={{ cursor: "pointer" }}
-          >
+          <Box key={post?._id} sx={{ cursor: "pointer" }}>
             <Box
               sx={{
                 display: "flex",
@@ -201,8 +211,10 @@ const PostList = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
+                  // justifyContent: "center",
                   alignItems: "center",
+                  width: "100%",
+                  // border: "1px solid",
                   gap: 3,
                 }}
               >
@@ -210,6 +222,7 @@ const PostList = () => {
                   <Avatar
                     src={`${imageUrl}${post?.author?.avatar}`}
                     sx={{ width: 50, height: 50, my: 0.5 }}
+                    onClick={(e) => getSinglePostHandler(post._id)}
                   />
                 ) : (
                   <Avatar
@@ -223,6 +236,7 @@ const PostList = () => {
                   </Button>
                 </Typography>
               </Box>
+
               <Box>
                 <MoreVertIcon
                   onClick={() => handleDeletePost(post._id)}
@@ -231,6 +245,16 @@ const PostList = () => {
                   }}
                 />
               </Box>
+            </Box>
+            <Box>
+              {showShareField && activePostShare === post._id && (
+                <div onClick={(e) => getSinglePostHandler(post._id)}>
+                  <p>Share this post: </p>
+                  <a href="" target="_blank" rel="noopener noreferrer">
+                    {shareLink}
+                  </a>
+                </div>
+              )}
             </Box>
             <h3>{post.text}</h3>
             {/* {console.log("first", `http://localhost:8000/${post.file}`)} */}

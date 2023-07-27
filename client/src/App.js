@@ -55,9 +55,6 @@ function App() {
 
 
 
-  useEffect(() => {
-    dispatch(authenticateUser());
-  }, [dispatch]);
 
   const onClinkHandler = () => {
     setLoading(true);

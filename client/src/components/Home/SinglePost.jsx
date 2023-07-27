@@ -30,27 +30,27 @@ import {
   deleteComment,
   likeComments,
 } from "../../ReduxToolKit/commentSlice";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const SinglePost = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [likedPosts, setLikedPosts] = useState([]);
   const [likedComment, setLikedComment] = useState([]);
   const [loadings, setLoading] = useState(false);
-  const [shareText, setShareText] = useState("");
+  // const [shareText, setShareText] = useState("");
   const [text, setTextValue] = useState("");
   const [activePost, setActivePost] = useState(null);
   const [showCommentField, setShowCommentField] = useState(false);
   const [loggedInUserId, setLoggedInUserId] = useState();
 
-  const [myPostId, setMyPostId] = useState();
+  // const [myPostId, setMyPostId] = useState();
   const { postId } = useParams();
   console.log("postId--- ", postId);
 
-  const SharePostData = useSelector((state) => state);
+  // const SharePostData = useSelector((state) => state);
 
   const data = useSelector((state) => state?.user?.user?.user);
   const { posts, error } = useSelector((state) => state?.post);
