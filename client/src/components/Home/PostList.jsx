@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { deletePost, getAllPosts } from "../../ReduxToolKit/postSlice";
+import {
+  deletePost,
+  getAllPosts,
+  sharePosts,
+} from "../../ReduxToolKit/postSlice";
 import {
   Avatar,
   Box,
@@ -25,10 +29,12 @@ import {
   deleteComment,
   likeComments,
 } from "../../ReduxToolKit/commentSlice";
+import { useNavigate } from "react-router-dom";
 
 const PostList = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   //______________________________like__________________________________
 
   const [likedPosts, setLikedPosts] = useState([]);
@@ -36,6 +42,7 @@ const PostList = () => {
 
   // _______________Loading State________________
   const [loadings, setLoading] = useState(false);
+  const [shareText, setShareText] = useState("");
 
   const [text, setTextValue] = useState(""); // comment text
 
@@ -43,6 +50,10 @@ const PostList = () => {
   const [showCommentField, setShowCommentField] = useState(false);
 
   const [loggedInUserId, setLoggedInUserId] = useState();
+
+  const SharePostData = useSelector((state) => state);
+  // console.log("SharePostData", SharePostData);
+
   const data = useSelector((state) => state?.user?.user?.user);
 
   const { posts, error } = useSelector((state) => state?.post);
@@ -69,11 +80,8 @@ const PostList = () => {
   //______________________________like__________________________________
 
   const likeHandler = (postId) => {
-    // alert(`http://localhost:8000/api/v1/like/${postId}`);
     dispatch(likePost(postId));
-
     const isPostLiked = likedPosts && likedPosts.includes(postId);
-
     if (isPostLiked) {
       // Unlike the post
       setLikedPosts(likedPosts.filter((id) => id !== postId));
@@ -89,13 +97,11 @@ const PostList = () => {
   //____________________Add Comment Handler --------------------------------
 
   const addCommentHandler = (postId) => {
-    // alert(postId);
     setActivePost(postId);
     setShowCommentField(true);
   };
 
   const handleCommentSubmit = (postId) => {
-    // e.preventDefault();
     setLoading(true);
     if (!text) {
       toast.success("Kindly type comment");
@@ -113,7 +119,6 @@ const PostList = () => {
 
   //____________Delete Comment________________
   const handleDeleteComment = (commentId) => {
-    // alert(commentId);
     setLoading(true);
     dispatch(deleteComment(commentId));
 
@@ -126,9 +131,7 @@ const PostList = () => {
 
   const handleLikeComment = (commentId) => {
     dispatch(likeComments(commentId));
-
     const isPostLike = likedComment && likedComment.includes(commentId);
-
     if (isPostLike) {
       // Unlike the post
       setLikedComment(likedComment.filter((id) => id !== commentId));
@@ -157,6 +160,22 @@ const PostList = () => {
       dispatch(getAllPosts());
     }, 3000);
   };
+
+  //-------------------------------Share Post -------------------------------
+  const sharePostHandler = (postId) => {
+    toast.success(postId);
+    // console.log("Share Post ", postId);
+    dispatch(sharePosts(postId));
+  };
+
+  //----------------get Single Post ----------------
+  const getSinglePostHandler = (postId) => {
+    // navigate("/singlePost");
+    navigate(`/singlePost/${postId}`);
+
+    // toast.success(postId);
+  };
+
   return (
     <>
       <Loading isLoading={loadings} />
@@ -165,7 +184,11 @@ const PostList = () => {
         <Button onClick={getAllPost}>All Post</Button>
 
         {[...posts].reverse().map((post) => (
-          <Box key={post?._id}>
+          <Box
+            key={post?._id}
+            onClick={(e) => getSinglePostHandler(post._id)}
+            sx={{ cursor: "pointer" }}
+          >
             <Box
               sx={{
                 display: "flex",
@@ -195,7 +218,9 @@ const PostList = () => {
                   />
                 )}
                 <Typography variant="h5">
-                  {post?.author?.firstName} {post?.author?.lastName}
+                  <Button onClick={(e) => getSinglePostHandler(post._id)}>
+                    {post?.author?.firstName} {post?.author?.lastName}
+                  </Button>
                 </Typography>
               </Box>
               <Box>
@@ -242,7 +267,7 @@ const PostList = () => {
               <Button onClick={(e) => addCommentHandler(post?._id)}>
                 <AddCommentIcon /> Comment
               </Button>
-              <Button>
+              <Button onClick={(e) => sharePostHandler(post?._id)}>
                 <ShareIcon /> Share
               </Button>
             </Box>

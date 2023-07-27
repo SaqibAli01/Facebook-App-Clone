@@ -50,10 +50,6 @@ export const getAllPosts = createAsyncThunk(
 
 //_____________________________ Get Single Post ___________________________________
 
-
-
-
-
 export const getUserPosts = createAsyncThunk(
     'post/getUserPosts',
     async (userId) => {
@@ -71,6 +67,28 @@ export const getUserPosts = createAsyncThunk(
         }
     }
 );
+
+//_____________________________ Get Single Post ___________________________________
+
+export const sharePosts = createAsyncThunk(
+    'post/sharePosts',
+    async (postId) => {
+        console.log("postId", postId)
+        const token = localStorage.getItem("token");
+
+        try {
+            const headers = {
+                token: token,
+            };
+            const response = await axios.post(`http://localhost:8000/api/v1/share/${postId}`, { headers });
+            console.log('share user', response.data)
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response.data.error);
+        }
+    }
+);
+
 
 //_____________________________ Delete Post___________________________________
 
@@ -92,6 +110,36 @@ export const deletePost = createAsyncThunk(
     }
 );
 
+//-------------------------------Get Single Post---------------------------------
+
+const backendURL = 'http://localhost:8000/api/v1';
+
+// Create an async thunk to fetch a single post using Axios
+export const fetchSinglePost = createAsyncThunk(
+    'posts/fetchSinglePost',
+    async (postId, { rejectWithValue }) => {
+        console.log('postId get', postId)
+        const token = localStorage.getItem("token");
+        try {
+            const headers = {
+                token: token,
+            };
+            const response = await axios.get(`${backendURL}/single-posts/${postId}`, { headers });
+            console.log('response.data fetch single post', response?.data)
+            return response.data;
+        } catch (error) {
+            return rejectWithValue({ error: 'Failed to fetch post' });
+        }
+    }
+);
+
+
+
+
+
+
+
+
 
 
 const postSlice = createSlice({
@@ -100,6 +148,7 @@ const postSlice = createSlice({
         posts: [], // get all posts
         loading: false,
         error: null,
+        singlePost: null,
         // successMessage: '',
     },
     reducers: {},
@@ -155,6 +204,23 @@ const postSlice = createSlice({
                 // toast.error(action?.error?.message);
             })
 
+            //______________________________Share Post______________________________
+
+            .addCase(sharePosts.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(sharePosts.fulfilled, (state, action) => {
+                state.loading = false;
+                state.posts = action?.payload;
+                toast.success(action?.payload?.message);
+            })
+            .addCase(sharePosts.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action?.payload?.message;
+                toast.error(action?.error?.message);
+            })
+
             //________________________Delete Post________________________________________
             .addCase(deletePost.pending, (state) => {
                 state.loading = true;
@@ -170,6 +236,22 @@ const postSlice = createSlice({
                 state.loading = false;
                 state.error = action?.error?.message;
                 state.error = action?.payload?.message;
+                toast.error(action?.error?.message || "Login failed")
+            })
+
+            //____________________ Get Single Post ______________________
+            .addCase(fetchSinglePost.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchSinglePost.fulfilled, (state, action) => {
+                state.loading = false;
+                state.singlePost = action.payload;
+                toast.success(action?.payload?.message)
+            })
+            .addCase(fetchSinglePost.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
                 toast.error(action?.error?.message)
             });
     },

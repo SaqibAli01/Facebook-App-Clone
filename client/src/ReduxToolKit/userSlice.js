@@ -189,8 +189,8 @@ export const logout = createAsyncThunk('user/logout', async () => {
             };
             const response = await axios.get('http://localhost:8000/api/v1/logout', { headers });
             localStorage.removeItem('token');
-            toast.success("Success User logged out");
-            console.log("response.data", response?.data)
+            // toast.success("Success User logged out");
+            // console.log("response.data", response?.data)
             return response.data;
         }
         else {
@@ -225,6 +225,7 @@ const userSlice = createSlice({
         loading: false,
         user: null,
         error: null,
+        isAuthenticated: false,
         successMessage: '',
     },
     reducers: {},
@@ -280,6 +281,7 @@ const userSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload;
+                state.isAuthenticated = true;
                 state.successMessage = action.payload.message;
                 toast.success(action?.payload?.message);
 
@@ -287,6 +289,7 @@ const userSlice = createSlice({
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
                 state.user = null;
+                state.isAuthenticated = false;
                 state.error = action.error.message;
                 toast.error(action?.error?.message);
             })
@@ -374,13 +377,13 @@ const userSlice = createSlice({
             })
             .addCase(updateUserInfo.fulfilled, (state, action) => {
                 state.loading = false;
-                state.successMessage = action.payload.message;
-                state.user = action.payload.user;
+                state.successMessage = action?.payload?.message;
+                state.user = action?.payload?.user;
                 toast.success(action?.payload?.message);
             })
             .addCase(updateUserInfo.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload.message;
+                state.error = action?.payload?.message;
                 toast.error(action?.error?.message);
             })
 
@@ -408,9 +411,9 @@ const userSlice = createSlice({
             })
             .addCase(logout.fulfilled, (state, action) => {
                 state.user = null;
-                // state.loading = false;
-                // state.user = action.payload;
-                // toast.success(action.payload.message);
+                state.loading = false;
+                state.user = action?.payload;
+                toast.success(action?.payload?.message);
 
             })
             .addCase(logout.rejected, (state, action) => {

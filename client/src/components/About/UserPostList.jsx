@@ -167,6 +167,13 @@ const UserPostList = () => {
       dispatch(getUserPosts(userId));
     }, 3000);
   };
+
+  //-------------------------------Share Post -------------------------------
+  const sharePostHandler = (postId) => {
+    alert("Share post");
+    toast.success(postId);
+    // toast.success(userId)
+  };
   return (
     <>
       <Loading isLoading={loadings} />
@@ -252,7 +259,7 @@ const UserPostList = () => {
               <Button onClick={(e) => addCommentHandler(post?._id)}>
                 <AddCommentIcon /> Comment
               </Button>
-              <Button>
+              <Button onClick={(e) => sharePostHandler(post?._id)}>
                 <ShareIcon /> Share
               </Button>
             </Box>

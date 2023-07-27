@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -16,53 +16,70 @@ import {
 import { authenticateUser, updateUserInfo } from "../../ReduxToolKit/userSlice";
 import Loading from "../Loader/Loading";
 
-// import { useNavigate } from "react-router-dom";
-
 const UserUpdatesInfo = ({ handleClose3 }) => {
-  // const navigate = useNavigate();
-
   const dispatch = useDispatch();
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm();
-  const { loadings, error, successMessage } = useSelector(
-    (state) => state.user
+  const [loadings, setLoading] = useState(false);
+
+  const { handleSubmit, control, formState, reset } = useForm({
+    defaultValues: {
+      firstName: "", // Set your default values here
+      lastName: "",
+      dob: "",
+      gender: "",
+    },
+  });
+
+  const { errors } = formState;
+
+  const { user, loading, error, successMessage } = useSelector(
+    (state) => state?.user?.user
   );
 
-  const onSubmit = async (data) => {
-    const formData = new FormData();
+  useEffect(() => {
+    if (user) {
+      // Reset the form fields when user data changes
+      reset({
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        dob: formatDate(user?.dob), // Format the dob before setting it
+        gender: user?.gender,
+      });
+    }
+  }, [user, reset]);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0]; // Format the date as "YYYY-MM-DD"
+  };
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+
+    // Submit the form data to the server
+    const formData = new FormData();
     for (const key in data) {
       formData.append(key, data[key]);
     }
-    setLoading(true);
-    console.log("formData", data);
-
     dispatch(updateUserInfo(formData));
-    // const response = await dispatch(updateUserInfo(formData));
+
+    // Close the dialog after form submission
     handleClose3();
+
+    // Reset the loading state after a delay
     setTimeout(() => {
       dispatch(authenticateUser());
-
       setLoading(false);
     }, 3000);
-
-    // if (response.payload) {
-    //   navigate("/profile");
-    // }
   };
 
-  // _______________Loading State________________
-  const [loading, setLoading] = useState(false);
+  if (loading) {
+    return <h1>Loading .....</h1>;
+  }
 
-  // _______________Loading State________________
-  // const theme = useTheme();
   return (
     <>
-      <Loading isLoading={loading} />
-
+      <Loading isLoading={loadings} />
       <Container sx={{ my: 2 }}>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -72,7 +89,6 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
             sx={{
               display: "flex",
               justifyContent: "center",
-              //   alignItems: "center",
               flexDirection: "column",
             }}
           >
@@ -80,7 +96,6 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
               <Controller
                 name="firstName"
                 control={control}
-                defaultValue=""
                 rules={{ required: true }}
                 render={({ field }) => (
                   <TextField
@@ -89,15 +104,15 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
                     placeholder="First Name"
                     fullWidth
                     margin="normal"
-                    error={errors.firstName}
+                    error={!!errors.firstName}
                     helperText={errors.firstName && "First Name is required"}
                   />
                 )}
               />
+
               <Controller
                 name="lastName"
                 control={control}
-                defaultValue=""
                 rules={{ required: true }}
                 render={({ field }) => (
                   <TextField
@@ -106,7 +121,7 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
                     placeholder="Last Name"
                     fullWidth
                     margin="normal"
-                    error={errors.lastName}
+                    error={!!errors.lastName}
                     helperText={errors.lastName && "Last Name is required"}
                   />
                 )}
@@ -116,7 +131,6 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
             <Controller
               name="dob"
               control={control}
-              defaultValue=""
               rules={{ required: true }}
               render={({ field }) => (
                 <TextField
@@ -129,17 +143,17 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  error={errors.dob}
+                  error={!!errors.dob}
                   helperText={errors.dob && "Date of Birth is required"}
                 />
               )}
             />
+
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
-                // justifyContent: "space-around",
               }}
             >
               <Typography
@@ -153,20 +167,14 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
               <Controller
                 name="gender"
                 control={control}
-                defaultValue=""
                 rules={{ required: true }}
                 render={({ field }) => (
                   <FormControl
                     component="fieldset"
                     margin="normal"
-                    error={errors.gender}
+                    error={!!errors.gender}
                   >
-                    <RadioGroup
-                      {...field}
-                      row
-                      defaultValue=""
-                      aria-label="Gender"
-                    >
+                    <RadioGroup {...field} row aria-label="Gender">
                       <FormControlLabel
                         value="Female"
                         control={<Radio />}
@@ -199,6 +207,7 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
                 Update User
               </Button>
             </Box>
+
             {loadings && (
               <Box mt={2} display="flex" alignItems="center">
                 <CircularProgress size={24} />
@@ -207,15 +216,16 @@ const UserUpdatesInfo = ({ handleClose3 }) => {
                 </Typography>
               </Box>
             )}
+
             {error && (
               <Typography variant="body2" color="error" mt={2}>
                 Error: {error}
               </Typography>
             )}
+
             {successMessage && (
               <Typography variant="body2" color="success" mt={2}>
                 {successMessage}
-                {/* {navigate("/login")} */}
               </Typography>
             )}
           </Box>

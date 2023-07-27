@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import SignUp from "./components/user/SignUp";
 import { useEffect, useState } from "react";
 
@@ -24,12 +24,16 @@ import PostList from "./components/Home/PostList";
 import VerificationCode from "./components/user/VerificationCode";
 import About from "./components/About/About";
 import Contact from "./components/Contact/Contact";
+import SinglePost from "./components/Home/SinglePost";
 // import ReSendVerifyCode from "./components/user/ReSendVerifyCode";
 // import Footer from "./components/Footer/Footer";
 
 
 
 function App() {
+  const dispatch = useDispatch();
+
+
   //_______________theme_______________
   const [mode, setMode] = useState(true);
   let theme = createCustomTheme(mode ? "light" : "dark");
@@ -41,14 +45,15 @@ function App() {
   //_______________theme end_____________
 
 
+  const isAuthenticated = useSelector((state) => state?.user?.isAuthenticated);
 
-  const data = useSelector((state) => state?.user?.user?.user);
-  console.log('data', data?.lastName)
-  // console.log("_____________________________________________________________________________")
-  // console.log('avatar, email, firstName, lastName, gender,', avatar, email, firstName, lastName, gender,)
-  // console.log("_____________________________________________________________________________")
+  console.log('data app .js', isAuthenticated)
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(authenticateUser());
+  }, [dispatch]);
+
+
 
   useEffect(() => {
     dispatch(authenticateUser());
@@ -90,7 +95,8 @@ function App() {
 
         <Routes>
 
-          <Route path="/" element={<Home />} />
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -102,8 +108,9 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/postList" element={<PostList />} />
           <Route path="/verificationCode" element={<VerificationCode />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={isAuthenticated ? <About /> : <Navigate to="/login" />} />
+          <Route path="/contact" element={isAuthenticated ? <Contact /> : <Navigate to="/login" />} />
+          <Route path="/singlePost/:postId" element={<SinglePost />} />
 
         </Routes>
 

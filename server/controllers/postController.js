@@ -1,4 +1,5 @@
 import { Post } from "../models/PostModel.js";
+import User from "../models/userModel.js";
 
 //-------------------- Create a new post --------------------------
 export const createPost = async (req, res) => {
@@ -90,7 +91,7 @@ export const getAllPosts = async (req, res) => {
 };
 
 
-//----------------------------- Get Single Data-----------------------------------
+//----------------------------- Get USER Data-----------------------------------
 export const getUserPosts = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -126,6 +127,46 @@ export const getUserPosts = async (req, res) => {
     }
 };
 
+//----------------------------- Get Single Post-----------------------------------
+export const getSinglePost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        console.log('postId', postId)
+
+        // Assuming you have a valid ObjectId for postId
+        const post = await Post.findById(postId)
+            .populate({
+                path: "author",
+                select: ["firstName", "lastName", "avatar"],
+            })
+            .populate({
+                path: "comments",
+                populate: [
+                    {
+                        path: "author",
+                        select: ["firstName", "lastName", "text", "avatar"],
+                    },
+                    {
+                        path: "replyComments",
+                        populate: {
+                            path: "author",
+                            select: ["firstName", "lastName", "text", "avatar"],
+                        },
+                    },
+                ],
+            });
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        res.status(200).json(post);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "An error occurred while retrieving the post." });
+    }
+};
+
 
 //------------------------------ Delete Post ----------------------------------
 
@@ -148,5 +189,35 @@ export const deletePost = async (req, res) => {
     } catch (error) {
         console.error('An error occurred while deleting the post.', error);
         res.status(500).json({ message: 'Failed to delete the post' });
+    }
+};
+
+
+//--------------------------- Share Post ------------------------------
+export const sharePost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { text } = req.body;
+        // console.log('text', text)
+        // console.log('postId', postId)
+
+        const originalPost = await Post.findById(postId);
+        console.log("🚀  originalPost:", originalPost)
+        if (!originalPost) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        const sharedPost = new Post({
+            text,
+            author: req.user._id,
+            sharedPost: originalPost._id,
+            // originalPost,
+        });
+
+        const savedSharedPost = await sharedPost.save();
+        res.status(200).json({ message: 'Post shared successfully', sharedPost: savedSharedPost });
+    } catch (error) {
+        console.error('An error occurred while sharing the post.', error);
+        res.status(500).json({ message: 'Failed to share the post' });
     }
 };
