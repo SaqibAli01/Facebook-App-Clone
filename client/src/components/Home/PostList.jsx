@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deletePost,
-  getAllPosts,
-  sharePosts,
-} from "../../ReduxToolKit/postSlice";
+import { deletePost, getAllPosts } from "../../ReduxToolKit/postSlice";
 import {
   Avatar,
   Box,
@@ -42,7 +38,7 @@ const PostList = () => {
 
   // _______________Loading State________________
   const [loadings, setLoading] = useState(false);
-  const [shareText, setShareText] = useState("");
+  // const [shareText, setShareText] = useState("");
   const [shareLink, setShareLink] = useState("");
 
   const [text, setTextValue] = useState(""); // comment text
@@ -56,7 +52,7 @@ const PostList = () => {
 
   const [loggedInUserId, setLoggedInUserId] = useState();
 
-  const SharePostData = useSelector((state) => state);
+  // const SharePostData = useSelector((state) => state);
   // console.log("SharePostData", SharePostData);
 
   const data = useSelector((state) => state?.user?.user?.user);
@@ -250,7 +246,7 @@ const PostList = () => {
               {showShareField && activePostShare === post._id && (
                 <div onClick={(e) => getSinglePostHandler(post._id)}>
                   <p>Share this post: </p>
-                  <a href="" target="_blank" rel="noopener noreferrer">
+                  <a href=" " target="_blank" rel="noopener noreferrer">
                     {shareLink}
                   </a>
                 </div>
@@ -296,13 +292,7 @@ const PostList = () => {
               </Button>
             </Box>
             {/* <p>Likes: {post?.likes?.length}</p> */}
-            <Box
-              sx={
-                {
-                  // border: "2px solid red",
-                }
-              }
-            >
+            <Box>
               <h4>Comments:</h4>
               {/* ${ data ? ` ${F_Name} ${L_Name} ` : "?"} */}
 
@@ -342,71 +332,65 @@ const PostList = () => {
               )}
               {post.comments.map((comment) => {
                 return (
-                  <>
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      justifyContent={"space-between"}
-                      alignItems={"center"}
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    justifyContent={"space-between"}
+                    alignItems={"center"}
+                    sx={{
+                      background: theme.palette.background.light,
+                      px: 1,
+                      my: 1,
+                    }}
+                  >
+                    <Box
                       sx={{
-                        background: theme.palette.background.light,
-                        px: 1,
-                        my: 1,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 2,
                       }}
                     >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 2,
-                        }}
-                      >
-                        <Avatar
-                          src={`${imageUrl}${comment?.author?.avatar}`}
-                          sx={{ width: 50, height: 50, my: 0.5 }}
-                        />
-                        <Typography variant="h5">
-                          {comment?.author?.firstName}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography>{comment?.text}</Typography>
-                      </Box>
-                      <Box>
-                        {comment?.author?._id === loggedInUserId ||
-                        post?.author?._id === loggedInUserId ? (
-                          <Button
-                            onClick={() =>
-                              handleDeleteComment(
-                                comment._id,
-                                post?.author?._id
-                              )
-                            }
-                          >
-                            <DeleteIcon />
-                          </Button>
-                        ) : null}
-                      </Box>
-                      <Box>
+                      <Avatar
+                        src={`${imageUrl}${comment?.author?.avatar}`}
+                        sx={{ width: 50, height: 50, my: 0.5 }}
+                      />
+                      <Typography variant="h5">
+                        {comment?.author?.firstName}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography>{comment?.text}</Typography>
+                    </Box>
+                    <Box>
+                      {comment?.author?._id === loggedInUserId ||
+                      post?.author?._id === loggedInUserId ? (
                         <Button
-                          // variant="gradient"
-                          onClick={(e) => handleLikeComment(comment?._id)}
+                          onClick={() =>
+                            handleDeleteComment(comment._id, post?.author?._id)
+                          }
                         >
-                          {likedComment &&
-                          likedComment.includes(comment?._id) ? (
-                            <FavoriteIcon style={{ color: "green" }} />
-                          ) : (
-                            <FavoriteIcon style={{ color: "red" }} />
-                          )}
-                          Likes
-                          <Typography variant="p" sx={{ pl: 3 }}>
-                            {comment?.likes?.length}
-                          </Typography>
+                          <DeleteIcon />
                         </Button>
-                      </Box>
-                    </Stack>
-                  </>
+                      ) : null}
+                    </Box>
+                    <Box>
+                      <Button
+                        // variant="gradient"
+                        onClick={(e) => handleLikeComment(comment?._id)}
+                      >
+                        {likedComment && likedComment.includes(comment?._id) ? (
+                          <FavoriteIcon style={{ color: "green" }} />
+                        ) : (
+                          <FavoriteIcon style={{ color: "red" }} />
+                        )}
+                        Likes
+                        <Typography variant="p" sx={{ pl: 3 }}>
+                          {comment?.likes?.length}
+                        </Typography>
+                      </Button>
+                    </Box>
+                  </Stack>
                 );
               })}
             </Box>

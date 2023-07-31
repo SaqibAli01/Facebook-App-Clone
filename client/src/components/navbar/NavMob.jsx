@@ -159,15 +159,13 @@ const NavMob = ({ children }) => {
       <List sx={{ mt: 5 }}>
         {array.map(({ link1, name }, index) => {
           return (
-            <>
-              <React.Fragment key={index}>
-                <NavLink to={link1} key={index} style={styledActiveLink}>
-                  <Typography sx={{ fontFamily: "Poppins", color: "red" }}>
-                    {name}
-                  </Typography>
-                </NavLink>
-              </React.Fragment>
-            </>
+            <React.Fragment key={index}>
+              <NavLink to={link1} key={index} style={styledActiveLink}>
+                <Typography sx={{ fontFamily: "Poppins", color: "red" }}>
+                  {name}
+                </Typography>
+              </NavLink>
+            </React.Fragment>
           );
         })}
       </List>

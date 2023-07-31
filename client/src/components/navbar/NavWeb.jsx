@@ -122,28 +122,26 @@ const NavWeb = ({ themeToggler, mode }) => {
           <Box sx={{ display: "flex", height: "40px", gap: "20px" }}>
             {array.map((item, index) => {
               return (
-                <>
-                  <NavLink to={item.link1} style={styledactivelink} key={index}>
-                    <Box
-                      key={index}
+                <NavLink to={item.link1} style={styledactivelink} key={index}>
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
                       sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
+                        fontFamily: "Poppins",
+                        FontSize: "22px",
+                        FontStyle: "Medium",
                       }}
                     >
-                      <Typography
-                        sx={{
-                          fontFamily: "Poppins",
-                          FontSize: "22px",
-                          FontStyle: "Medium",
-                        }}
-                      >
-                        {item.name}
-                      </Typography>
-                    </Box>
-                  </NavLink>
-                </>
+                      {item.name}
+                    </Typography>
+                  </Box>
+                </NavLink>
               );
             })}
             <Box>
