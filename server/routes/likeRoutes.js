@@ -5,6 +5,6 @@ import postLikes from "../controllers/likeController.js";
 
 const router = express.Router();
 
-router.post("/postLike/:postId", verifyLoginUser, postLikes);
+router.post("/api/v1/postLike/:postId", verifyLoginUser, postLikes);
 
 export default router;

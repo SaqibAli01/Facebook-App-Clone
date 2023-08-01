@@ -4,8 +4,8 @@ import { addComment, deleteComment, likeComment } from "../controllers/CommentCo
 
 const router = express.Router();
 
-router.post("/addComment", verifyLoginUser, addComment);
-router.delete("/deleteComment/:commentId", verifyLoginUser, deleteComment);
-router.post("/likeComment/:commentId", verifyLoginUser, likeComment);
+router.post("/api/v1/addComment", verifyLoginUser, addComment);
+router.delete("/api/v1/deleteComment/:commentId", verifyLoginUser, deleteComment);
+router.post("/api/v1/likeComment/:commentId", verifyLoginUser, likeComment);
 
 export default router;

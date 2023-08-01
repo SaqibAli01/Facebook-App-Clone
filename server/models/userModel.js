@@ -21,7 +21,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true,
-        minLength: 6, // Example: set a minimum password length of 6 characters
+        minLength: 6,
     },
     dob: {
         type: Date,
@@ -30,7 +30,7 @@ const userSchema = new Schema({
     gender: {
         type: String,
         required: true,
-        enum: ['Male', 'Female', 'Other'], // Example: limit gender options to a specific set
+        enum: ['Male', 'Female', 'Other'],
     },
     avatar: {
         type: String,
@@ -45,21 +45,38 @@ const userSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    //email verification
     verified: {
         type: Boolean,
         default: false,
     },
-    // verificationCode: {
-    //     type: String,
-    //     default: null, // Initially set to null as no verification code is generated yet
-    // },
     verificationCode: {
         type: String,
-        default: null, // or omit the default value if you prefer
+        default: null,
     },
     verificationCodeExpiresAt: {
         type: Date,
-        default: null, // or omit the default value if you prefer
+        default: null,
+    },
+    // New fields for phone verification
+    phoneNumber: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+
+    // No verification
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    isVerificationCode: {
+        type: String,
+        default: null,
+    },
+    isVerificationCodeExpiresAt: {
+        type: Date,
+        default: null,
     },
 
 

@@ -11,10 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/v1/', user);
-app.use("/api/v1", post);
-app.use("/api/v1", comments);
-app.use("/api/v1", likes);
+app.use(user);
+app.use(post);
+app.use(comments);
+app.use(likes);
 
 //multer //image frontend
 app.use("/uploads", express.static("uploads"));

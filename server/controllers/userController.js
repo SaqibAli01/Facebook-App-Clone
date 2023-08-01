@@ -4,6 +4,7 @@ import generateToken from "../utils/jwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import { sendVerificationCode } from "../utils/sendEmailSignUp.js";
 import generateVerificationCode from "../utils/VerificationCode.js";
+import { sendOTPNo } from "../utils/SendOtpPhoneNo.js";
 // import crypto from "crypto"
 
 // ___________________________Sign Up________________________
@@ -18,7 +19,7 @@ import generateVerificationCode from "../utils/VerificationCode.js";
 
 const signUp = async (req, res) => {
     try {
-        const { firstName, lastName, email, password, dob, gender } = req.body;
+        const { firstName, lastName, email, password, phoneNumber, dob, gender } = req.body;
 
         const existingUser = await User.findOne({ email });
 
@@ -33,9 +34,13 @@ const signUp = async (req, res) => {
         const avatarPath = req.file.path;
         const encPassword = await bcrypt.hash(password, 12);
 
-        // Generate a verification code
+        // Generate a verification code for email
         const verificationCode = generateVerificationCode();
-        const verificationCodeExpiresAt = new Date(Date.now() + 60000); // 60,000 milliseconds = 1 minute (adjust as needed)
+        const verificationCodeExpiresAt = new Date(Date.now() + 120000); // 120,000 milliseconds = 2 minute (adjust as needed)
+
+        // Generate a verification code for phone number
+        const isVerificationCode = generateVerificationCode();
+        const isVerificationCodeExpiresAt = new Date(Date.now() + 120000); // 900,000 milliseconds = 15 minute (adjust as needed)
 
 
         // console.log('verificationCode', verificationCode);
@@ -45,12 +50,16 @@ const signUp = async (req, res) => {
             lastName,
             email,
             password: encPassword,
+            phoneNumber,
             dob,
             gender,
             avatar: avatarPath,
+            verified: false, //for email
             verificationCode,
-            verificationCodeExpiresAt, // Add the verification code to the user record
-            verified: false, // Set the verified field to false initially
+            verificationCodeExpiresAt,
+            isVerified: false, //for Phone No
+            isVerificationCode,
+            isVerificationCodeExpiresAt,
         });
         // console.log('newUser', newUser);
         await newUser.save();
@@ -58,11 +67,11 @@ const signUp = async (req, res) => {
         // Send the verification code to the user's email
         // console.log('email, verificationCode', email, verificationCode);
         await sendVerificationCode(email, verificationCode);
-
+        await sendOTPNo(phoneNumber, isVerificationCode)
 
         return res.status(201).json({
             success: true,
-            message: "User created successfully. Please verify your email.",
+            message: "User created successfully. Please verify your Phone No.",
             email,
         });
     }
@@ -153,8 +162,86 @@ export const resendVerificationCode = async (req, res) => {
     }
 };
 
+// verify phone number
+export const verifyCodePhoneNo = async (req, res) => {
+    try {
+        const { phoneNumber, isVerificationCode } = req.body;
+        console.log('isVerificationCode', isVerificationCode)
+
+        // const user = await User.findOne({ email });
+        const user = await User.findOne({ isVerificationCode });
+        console.log('isVerificationCode', isVerificationCode);
+        console.log('user.isVerificationCode', user?.isVerificationCode);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the verification code has expired
+        if (user.isVerificationCodeExpiresAt < new Date()) {
+            return res.status(400).json({ message: 'Verification code has expired' });
+        }
+
+        if (user.isVerificationCode === isVerificationCode) {
+            // Update the user's record to mark it as verified
+            await User.findByIdAndUpdate(user._id, { isVerified: true });
+            user.isVerificationCode = undefined;
+            user.isVerificationCodeExpiresAt = undefined;
+            await user.save();
+            return res.status(200).json({ message: 'Verification successful' });
+        } else {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+    } catch (error) {
+        console.error('Error in verifyCode:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
+export const resendOtpNo = async (req, res) => {
+    try {
+        const { email, phoneNumber } = req.body;
+        console.log('email', email);
+        console.log('phoneNumber', phoneNumber);
+
+        const user = await User.findOne({ email });
+        console.log('user', user);
+
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: 'User is already verified' });
+        }
+
+        // Check if the verification code has expired
+        if (user.isVerificationCodeExpiresAt && user.isVerificationCodeExpiresAt < new Date()) {
+
+            const isVerificationCode = generateVerificationCode();
+            console.log('New isVerificationCode', isVerificationCode);
+
+
+            // Update the user's verification code and expiration time in the database
+            user.isVerificationCode = isVerificationCode;
+            user.isVerificationCodeExpiresAt = new Date(Date.now() + 120000) // 900000 milliseconds = 15 minutes (adjust as needed)
+            await user.save();
+
+            // Send the new verification code to the user's phone number
+            await sendVerificationCode(phoneNumber, isVerificationCode);
+
+            return res.status(200).json({ message: 'Verification code resent successfully' });
+        }
+        else {
+            return res.status(400).json({ message: 'Verification code is still valid' });
+        }
+    } catch (error) {
+        console.error('Error in resendOtpNo:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
 
@@ -218,10 +305,14 @@ export const userLogin = async (req, res) => {
         if (!user.verified) {
             return res.status(401).json({ message: "Account not verified. Please verify your email first." });
         }
+        // if (!user.phoneNumber || !user.isVerified) {
+        //     return res.status(401).json({ message: "Account not verified. Please verify your PhoneNo first." });
+        //     // await res.status(201).json({ message: "Account not verified. Please verify your PhoneNo first." });
+        // }
 
         const token = generateToken(email);
 
-        res.status(200).json({ message: 'User signed in successfully', token, user });
+        res.status(200).json({ message: 'User signed in successfully . Please verify your PhoneNo first.', token, user });
 
     } catch (error) {
         console.error('Error in signIn User:', error);
@@ -402,7 +493,7 @@ export const updateProfile = async (req, res) => {
 
 export const updateUserInfo = async (req, res) => {
     try {
-        const { firstName, lastName, dob, gender } = req.body;
+        const { firstName, lastName, dob, gender, phoneNumber } = req.body;
 
         // Find the user by ID
         const userId = req.user.id;
@@ -414,6 +505,8 @@ export const updateUserInfo = async (req, res) => {
         // Update the user's firstName, lastName, dob, and gender
         user.firstName = firstName;
         user.lastName = lastName;
+        user.phoneNumber = phoneNumber;
+        user.email = email;
         user.dob = dob;
         user.gender = gender;
 

@@ -17,33 +17,38 @@ import {
   Avatar,
   useTheme,
 } from "@mui/material";
+
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { signup } from "../../ReduxToolKit/userSlice";
+
 import Loading from "../Loader/Loading";
 
 import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
+
   const {
     handleSubmit,
     control,
     formState: { errors },
   } = useForm();
+
   const { loadings, error, successMessage } = useSelector(
     (state) => state.user
   );
-  const [showPassword, setShowPassword] = useState(false);
+  // _______________Loading State________________
+  const theme = useTheme();
+  const [loading, setLoading] = useState(false);
 
   const [userData, setUserData] = useState();
   const [showImage, setShowImage] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setUserData(file);
-
     //img show
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -66,9 +71,7 @@ const SignUp = () => {
     console.log("response.payload", reSendEmail);
 
     if (response.payload) {
-      // navigate("/verificationCode");
       navigate("/verificationCode", { state: { reSendEmail } });
-      // Pass reSendEmail as state to the next route
     }
   };
 
@@ -76,11 +79,6 @@ const SignUp = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
-  // _______________Loading State________________
-  const [loading, setLoading] = useState(false);
-
-  // _______________Loading State________________
-  const theme = useTheme();
   return (
     <>
       <Loading isLoading={loading} />
@@ -164,42 +162,71 @@ const SignUp = () => {
                 />
               )}
             />
-            <Controller
-              name="password"
-              control={control}
-              defaultValue=""
-              rules={{ required: true }}
-              render={({ field }) => (
-                <FormControl fullWidth margin="normal" error={errors.password}>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Controller
+                name="phoneNumber"
+                control={control}
+                defaultValue="+92"
+                rules={{ required: true }}
+                render={({ field }) => (
                   <TextField
                     {...field}
-                    type={showPassword ? "text" : "password"}
-                    label="Password"
-                    placeholder="Password"
+                    label="Phone No"
+                    placeholder="+923004570193"
                     fullWidth
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={handleTogglePassword}>
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
+                    margin="normal"
+                    error={errors.phoneNumber}
+                    helperText={
+                      errors.phoneNumber && "Phone Number is required"
+                    }
                   />
-                  {errors.password && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "red",
+                )}
+              />
+              <Controller
+                name="password"
+                control={control}
+                defaultValue=""
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <FormControl
+                    fullWidth
+                    margin="normal"
+                    error={errors.password}
+                  >
+                    <TextField
+                      {...field}
+                      type={showPassword ? "text" : "password"}
+                      label="Password"
+                      placeholder="Password"
+                      fullWidth
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={handleTogglePassword}>
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      Password is required
-                    </Typography>
-                  )}
-                </FormControl>
-              )}
-            />
+                    />
+                    {errors.password && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "red",
+                        }}
+                      >
+                        Password is required
+                      </Typography>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Box>
             <Controller
               name="dob"
               control={control}

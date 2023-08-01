@@ -8,16 +8,16 @@ const router = express.Router();
 
 
 router.post(
-    "/create-post",
+    "/api/v1/create-post",
     verifyLoginUser,
     upload.single("file"),
     createPost
 );
-router.get("/getAllPosts", getAllPosts);
-router.get("/user-posts/:userId", verifyLoginUser, getUserPosts);
-router.delete("/delete/:postId", verifyLoginUser, deletePost);
-router.post('/share/:postId', verifyLoginUser, sharePost);
-router.get('/single-posts/:postId', verifyLoginUser, getSinglePost);
+router.get("/api/v1/getAllPosts", getAllPosts);
+router.get("/api/v1/user-posts/:userId", verifyLoginUser, getUserPosts);
+router.delete("/api/v1/delete/:postId", verifyLoginUser, deletePost);
+router.post('/api/v1/share/:postId', verifyLoginUser, sharePost);
+router.get('/api/v1/single-posts/:postId', verifyLoginUser, getSinglePost);
 
 
 export default router;

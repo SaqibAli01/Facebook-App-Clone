@@ -217,6 +217,51 @@ export const resendVerificationCode = createAsyncThunk(
     }
 );
 
+//_________________________ Send OTP Mobile Number __________________
+export const sendOtpNo = createAsyncThunk(
+    "user/sendOtpNo",
+    async (data) => {
+        try {
+            const token = localStorage.getItem("token");
+            const headers = {
+                token: token,
+            };
+            const response = await axios.post(
+                "http://localhost:8000/api/v1/isVerify",
+                data,
+                { headers }
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
+);
+
+//_________________________ Send OTP Mobile Number __________________
+export const reSendOtpNo = createAsyncThunk(
+    "user/reSendOtpNo",
+    async (data) => {
+        console.log('data-------', data)
+        try {
+            const token = localStorage.getItem("token");
+            const headers = {
+                token: token,
+            };
+            const response = await axios.post(
+                "http://localhost:8000/api/v1/re-send-Otp",
+                data,
+                { headers }
+            );
+            console.log("response.data", response?.data);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
+);
+
+
 //___________________________  user slice _______________________________
 
 const userSlice = createSlice({
@@ -438,7 +483,42 @@ const userSlice = createSlice({
                 state.error = action?.error?.message;
                 toast.error(action?.error?.message);
 
+            })
+
+            //___________________ Send VerificationCode Phone No _______________________
+
+            .addCase(sendOtpNo.pending, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(sendOtpNo.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                toast.success(action?.payload?.message);
+            })
+            .addCase(sendOtpNo.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action?.error?.message;
+                toast.error(action?.error?.message);
+            })
+
+            //___________________ Re Send VerificationCode Phone No _____________________
+
+            .addCase(reSendOtpNo.pending, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(reSendOtpNo.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                toast.success(action?.payload?.message);
+            })
+            .addCase(reSendOtpNo.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action?.error?.message;
+                toast.error(action?.error?.message);
             });
+
 
 
 
